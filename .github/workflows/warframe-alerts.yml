@@ -2,22 +2,40 @@ name: Warframe Alerts
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/2 * * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   check:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - run: python check.py
+      - name: Run script
+        run: python check.py
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+      - name: Commit state
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add state.json
+
+          git diff --cached --quiet || git commit -m "Update state"
+
+          git push
