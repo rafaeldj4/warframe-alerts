@@ -1,1 +1,3 @@
-state = {"sent_ids": []}
+{
+  "sent_ids": []
+}
