@@ -13,8 +13,9 @@ if os.path.exists(STATE_FILE):
 else:
     state = {"sent_ids": []}
 
-sent_ids = set(state["sent_ids"])
+sent_ids = set(state.get("sent_ids", []))
 
+# Obtener datos de Warframe
 worldstate = requests.get(
     "https://api.warframestat.us/pc",
     timeout=30
@@ -26,6 +27,7 @@ for fissure in worldstate.get("fissures", []):
 
     fissure_id = fissure.get("id")
 
+    # Evitar alertas duplicadas
     if fissure_id in sent_ids:
         continue
 
@@ -43,8 +45,9 @@ for fissure in worldstate.get("fissures", []):
 
         now = datetime.now(timezone.utc)
 
-        remaining_seconds = int(
-            (expiry - now).total_seconds()
+        remaining_seconds = max(
+            0,
+            int((expiry - now).total_seconds())
         )
 
         hours = remaining_seconds // 3600
@@ -55,20 +58,20 @@ for fissure in worldstate.get("fissures", []):
     except Exception:
         remaining_text = "Desconocido"
 
-    # HELENE STEEL PATH FISSURE
-    if hard and "Helene" in node:
+    # Helene Steel Path
+    if hard and node == "Helene (Saturn)":
 
         messages.append(
-            f"🚨 HELENE STEEL PATH FISSURE\n"
-            f"📍 {node}\n"
-            f"🎯 {mission}\n"
-            f"🔮 {tier}\n"
-            f"⏳ Restante: {remaining_text}"
+            f"🚨 HELENE STEEL PATH DISPONIBLE\n"
+            f"📍 Nodo: {node}\n"
+            f"🎯 Tipo: {mission}\n"
+            f"🔮 Reliquia: {tier}\n"
+            f"⏳ Tiempo restante: {remaining_text}"
         )
 
         sent_ids.add(fissure_id)
 
-    # OMNIA VOID CASCADE
+    # Omnia Void Cascade
     elif (
         hard
         and tier == "Omnia"
@@ -76,9 +79,9 @@ for fissure in worldstate.get("fissures", []):
     ):
 
         messages.append(
-            f"🔥 OMNIA VOID CASCADE\n"
-            f"📍 {node}\n"
-            f"⏳ Restante: {remaining_text}"
+            f"🔥 OMNIA VOID CASCADE DISPONIBLE\n"
+            f"📍 Nodo: {node}\n"
+            f"⏳ Tiempo restante: {remaining_text}"
         )
 
         sent_ids.add(fissure_id)
@@ -86,19 +89,24 @@ for fissure in worldstate.get("fissures", []):
 # Enviar alertas
 for msg in messages:
 
-    requests.post(
+    response = requests.post(
         WEBHOOK_URL,
         json={"content": msg},
         timeout=30
     )
 
-    print(f"Alerta enviada: {msg}")
+    print(
+        f"Alerta enviada ({response.status_code})"
+    )
+
+# Limitar historial a los últimos 500 IDs
+sent_ids = list(sent_ids)[-500:]
 
 # Guardar estado
 with open(STATE_FILE, "w") as f:
     json.dump(
         {
-            "sent_ids": list(sent_ids)
+            "sent_ids": sent_ids
         },
         f,
         indent=2
