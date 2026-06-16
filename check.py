@@ -48,6 +48,9 @@ for fissure in worldstate.get("fissures", []):
         continue
 
     # HELENE STEEL PATH
+    print(
+    f"Nodo={node} | Tipo={mission} | Tier={tier} | Hard={hard}"
+)
     if hard and node == "Helene (Saturn)":
 
         messages.append(
@@ -78,7 +81,12 @@ for fissure in worldstate.get("fissures", []):
         sent_ids.add(fissure_id)
 
 # Enviar alertas
+print(f"Cantidad de alertas encontradas: {len(messages)}")
+
 for msg in messages:
+
+    print("=== ALERTA ===")
+    print(msg)
 
     response = requests.post(
         WEBHOOK_URL,
@@ -86,9 +94,8 @@ for msg in messages:
         timeout=30
     )
 
-    print(
-        f"Alerta enviada ({response.status_code})"
-    )
+    print(f"Discord status: {response.status_code}")
+    print(response.text)
 
 # Mantener historial limitado
 sent_ids = list(sent_ids)[-500:]
