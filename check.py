@@ -55,8 +55,7 @@ for fissure in worldstate.get("fissures", []):
             f"📍 Nodo: {node}\n"
             f"🎯 Tipo: {mission}\n"
             f"🔮 Reliquia: {tier}\n"
-            f"⏰ Finaliza: <t:{expiry_unix}:F>\n"
-            f"⏳ Restante: <t:{expiry_unix}:R>"
+            f"⏳ Expira: <t:{expiry_unix}:R>"
         )
 
         sent_ids.add(fissure_id)
@@ -71,8 +70,7 @@ for fissure in worldstate.get("fissures", []):
         messages.append(
             f"🔥 OMNIA VOID CASCADE DISPONIBLE\n"
             f"📍 Nodo: {node}\n"
-            f"⏰ Finaliza: <t:{expiry_unix}:F>\n"
-            f"⏳ Restante: <t:{expiry_unix}:R>"
+            f"⏳ Expira: <t:{expiry_unix}:R>"
         )
 
         sent_ids.add(fissure_id)
