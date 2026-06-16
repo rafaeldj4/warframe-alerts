@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from datetime import datetime, timezone
+from datetime import datetime
 
 WEBHOOK_URL = os.environ["DISCORD_WEBHOOK"]
 STATE_FILE = "state.json"
@@ -35,7 +35,6 @@ for fissure in worldstate.get("fissures", []):
     mission = fissure.get("missionType", "")
     tier = fissure.get("tier", "")
     hard = fissure.get("isHard", False)
-
     expiry_str = fissure.get("expiry", "")
 
     try:
@@ -43,22 +42,12 @@ for fissure in worldstate.get("fissures", []):
             expiry_str.replace("Z", "+00:00")
         )
 
-        now = datetime.now(timezone.utc)
-
-        remaining_seconds = max(
-            0,
-            int((expiry - now).total_seconds())
-        )
-
-        hours = remaining_seconds // 3600
-        minutes = (remaining_seconds % 3600) // 60
-
-        remaining_text = f"{hours}h {minutes}m"
+        expiry_unix = int(expiry.timestamp())
 
     except Exception:
-        remaining_text = "Desconocido"
+        continue
 
-    # Helene Steel Path
+    # HELENE STEEL PATH
     if hard and node == "Helene (Saturn)":
 
         messages.append(
@@ -66,12 +55,13 @@ for fissure in worldstate.get("fissures", []):
             f"📍 Nodo: {node}\n"
             f"🎯 Tipo: {mission}\n"
             f"🔮 Reliquia: {tier}\n"
-            f"⏳ Tiempo restante: {remaining_text}"
+            f"⏰ Finaliza: <t:{expiry_unix}:F>\n"
+            f"⏳ Restante: <t:{expiry_unix}:R>"
         )
 
         sent_ids.add(fissure_id)
 
-    # Omnia Void Cascade
+    # OMNIA VOID CASCADE
     elif (
         hard
         and tier == "Omnia"
@@ -81,7 +71,8 @@ for fissure in worldstate.get("fissures", []):
         messages.append(
             f"🔥 OMNIA VOID CASCADE DISPONIBLE\n"
             f"📍 Nodo: {node}\n"
-            f"⏳ Tiempo restante: {remaining_text}"
+            f"⏰ Finaliza: <t:{expiry_unix}:F>\n"
+            f"⏳ Restante: <t:{expiry_unix}:R>"
         )
 
         sent_ids.add(fissure_id)
@@ -99,7 +90,7 @@ for msg in messages:
         f"Alerta enviada ({response.status_code})"
     )
 
-# Limitar historial a los últimos 500 IDs
+# Mantener historial limitado
 sent_ids = list(sent_ids)[-500:]
 
 # Guardar estado
