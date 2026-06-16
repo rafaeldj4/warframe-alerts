@@ -27,9 +27,11 @@ for fissure in worldstate.get("fissures", []):
 
     # Mostrar Omnia para depuración
     if hard and tier == "Omnia":
-        print(
-            f"OMNIA DETECTADA -> {node} | {mission}"
-        )
+    messages.append(
+        f"🔮 OMNIA DETECTADA\n"
+        f"📍 {node}\n"
+        f"🎯 {mission}"
+    )
 
 for msg in messages:
     requests.post(
