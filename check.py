@@ -1,11 +1,40 @@
+import os
 import requests
-import json
 
-worldstate = requests.get("https://api.warframestat.us/pc").json()
+WEBHOOK_URL = os.environ["DISCORD_WEBHOOK"]
 
-print("=== TODAS LAS FISSURES HARD MODE ===")
+worldstate = requests.get(
+    "https://api.warframestat.us/pc"
+).json()
+
+messages = []
 
 for fissure in worldstate.get("fissures", []):
-    if fissure.get("isHard"):
-        print(json.dumps(fissure, indent=2))
-        print("-" * 50)
+
+    node = fissure.get("node", "")
+    mission = fissure.get("missionType", "")
+    tier = fissure.get("tier", "")
+    hard = fissure.get("isHard", False)
+
+    # Helene Steel Path Fissure
+    if hard and "Helene" in node:
+        messages.append(
+            f"🚨 HELENE STEEL PATH FISSURE\n"
+            f"📍 {node}\n"
+            f"🎯 {mission}\n"
+            f"🔮 {tier}"
+        )
+
+    # Mostrar Omnia para depuración
+    if hard and tier == "Omnia":
+        print(
+            f"OMNIA DETECTADA -> {node} | {mission}"
+        )
+
+for msg in messages:
+    requests.post(
+        WEBHOOK_URL,
+        json={"content": msg}
+    )
+
+print("Revision completada")
