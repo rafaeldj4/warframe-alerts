@@ -1,15 +1,16 @@
 import requests
 import json
 
-worldstate = requests.get(
-    "https://api.warframestat.us/pc"
-).json()
+worldstate = requests.get("https://api.warframestat.us/pc").json()
 
-print("=== CLAVES PRINCIPALES ===")
-print(worldstate.keys())
+print("=== STEEL PATH ===")
+print(json.dumps(worldstate.get("steelPath", {}), indent=2))
 
-print("\n=== STEEL PATH ===")
-print(json.dumps(worldstate.get("steelPath", {}), indent=2)[:5000])
+print("\n=== ZARIMAN CYCLE ===")
+print(json.dumps(worldstate.get("zarimanCycle", {}), indent=2))
 
-print("\n=== MISIONES ===")
-print(json.dumps(worldstate.get("missions", []), indent=2)[:5000])
+print("\n=== ARBITRATION ===")
+print(json.dumps(worldstate.get("arbitration", {}), indent=2))
+
+print("\n=== FISSURES (PRIMERAS 5) ===")
+print(json.dumps(worldstate.get("fissures", [])[:5], indent=2))
